@@ -36,22 +36,25 @@ public class MainActivity extends AppCompatActivity {
         txt_password = (EditText) findViewById(R.id.txt_password);
 
         btn_login = (Button) findViewById(R.id.btn_login);
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setVisibility(View.GONE);
 
     }
 
     public void doLogin(View view) {
 
+        String username = txt_username.getText().toString().trim();
+        String password = txt_password.getText().toString().trim();
         CheckLogin login = new CheckLogin();
-        login.execute("");
+        login.execute(username, password);
+
 
     }
 
     public class CheckLogin extends AsyncTask<String, String, String> {
 
         String error_message = "";
-        Boolean login_successed = false;
+        Boolean login_succeed = false;
 
         public CheckLogin() {
             super();
@@ -67,8 +70,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
 
+            String show_message = s;
+
             progressBar.setVisibility(View.GONE);
-            Toast.makeText(MainActivity.this, "Login Successfull", Toast.LENGTH_SHORT).show();
+
+            if (login_succeed) {
+                show_message = "Login Successful";
+            }
+
+            Toast.makeText(MainActivity.this, show_message, Toast.LENGTH_LONG).show();
+
 
         }
 
@@ -89,8 +100,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... strings) {
-            String username = txt_username.getText().toString().trim();
-            String password = txt_password.getText().toString().trim();
+
+            String username = strings[0];
+            String password = strings[1];
 
             if (username.equals("") || password.equals("")) {
                 error_message = "Please enter UserName or Password";
@@ -108,14 +120,16 @@ public class MainActivity extends AppCompatActivity {
                         ResultSet rs = stmt.executeQuery(query);
 
                         if (rs.next()) {
-                            error_message = "Login Successed";
-                            login_successed = true;
+                            error_message = "Login Succeed";
+                            login_succeed = true;
                             conn.close();
                         } else {
+                            login_succeed = false;
                             error_message = "Login failed, Check username or password";
                         }
                     }
                 } catch (Exception ex) {
+                    login_succeed = false;
                     error_message = ex.getMessage();
                 }
             }
